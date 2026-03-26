@@ -1,0 +1,21 @@
+mport pandas as pd
+import sqlite3
+
+# Load the COVID-19 dataset
+data = pd.read_csv(r"C:\Users\sebra\Desktop\covid_data.csv")  
+
+# handle missing data
+data["Age"].fillna(data["Age"].mean(), inplace=True)
+data["Oxygen_Level"].fillna(data["Oxygen_Level"].median(), inplace=True)
+data["Comorbidity_Score"].fillna(0, inplace=True)
+
+# Save cleaned data to SQLite
+conn = sqlite3.connect("covid_data.db")
+data.to_sql("patients", conn, if_exists="replace", index=False)
+
+# Query: patients with oxygen level < 92
+query = "SELECT * FROM patients WHERE Oxygen_Level < 92"
+low_oxygen = pd.read_sql(query, conn)
+print(low_oxygen)
+
+conn.close()
